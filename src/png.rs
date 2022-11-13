@@ -66,7 +66,8 @@ impl Png {
 
 impl std::fmt::Display for Png {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", "")
+        let chunks_str: Vec<String> = self.chunks.iter().map(|c| c.to_string()).collect();
+        write!(f, "Png{{ {} }}", chunks_str.join(",\n"))
     }
 }
 

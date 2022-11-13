@@ -36,7 +36,12 @@ impl Chunk {
     }
 
     pub fn data_as_string(&self) -> Result<String> {
-        Ok((String::from_utf8(self.data.clone())).unwrap())
+        if self.data.len() < 64 {
+            let s = String::from_utf8_lossy(&self.data);
+            Ok(s.to_string())
+        } else {
+            Ok(format!("[.. {} bytes ..]", self.data.len()))
+        }
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
@@ -95,7 +100,7 @@ impl std::fmt::Display for Chunk {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Chunk{{type: {}, data: {}, len: {}}}",
+            "Chunk{{type: {}, data: '{}', len: {}}}",
             self.chunk_type(),
             self.data_as_string().unwrap(),
             self.length()
