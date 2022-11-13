@@ -1,11 +1,6 @@
 use crate::chunk_type::ChunkType;
 use crate::Result;
 
-struct Chunk {
-    chunk_type: ChunkType,
-    data: Vec<u8>,
-}
-
 #[derive(Debug, thiserror::Error)]
 pub enum ChunkError {
     #[error("Length mismatch")]
@@ -14,32 +9,45 @@ pub enum ChunkError {
     CrcMismatch,
 }
 
+pub struct Chunk {
+    chunk_type: ChunkType,
+    data: Vec<u8>,
+}
+
 impl Chunk {
-    fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
+    pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         Chunk { chunk_type, data }
     }
 
-    fn length(&self) -> u32 {
+    pub fn length(&self) -> u32 {
         self.data.len() as u32
     }
 
-    fn chunk_type(&self) -> &ChunkType {
+    pub fn chunk_type(&self) -> &ChunkType {
         &self.chunk_type
     }
 
-    fn data(&self) -> &[u8] {
+    pub fn data(&self) -> &[u8] {
         &self.data
     }
 
-    fn crc(&self) -> u32 {
-        crc::crc32::checksum_ieee(&self.as_bytes())
+    pub fn crc(&self) -> u32 {
+        crc::crc32::checksum_ieee(&self.type_and_data_bytes())
     }
 
-    fn data_as_string(&self) -> Result<String> {
+    pub fn data_as_string(&self) -> Result<String> {
         Ok((String::from_utf8(self.data.clone())).unwrap())
     }
 
-    fn as_bytes(&self) -> Vec<u8> {
+    pub fn as_bytes(&self) -> Vec<u8> {
+        let mut bytes = self.length().to_be_bytes().to_vec();
+        bytes.extend(self.chunk_type.bytes());
+        bytes.extend(self.data.to_vec());
+        bytes.extend(self.crc().to_be_bytes().to_vec());
+        bytes
+    }
+
+    fn type_and_data_bytes(&self) -> Vec<u8> {
         let mut bytes = self.chunk_type.bytes().to_vec();
         bytes.extend(self.data.to_vec());
         bytes
@@ -127,7 +135,7 @@ mod tests {
             .to_vec();
         let chunk = Chunk::new(chunk_type, data);
         assert_eq!(chunk.length(), 42);
-        // assert_eq!(chunk.crc(), 2882656334);
+        assert_eq!(chunk.crc(), 2882656334);
     }
 
     #[test]

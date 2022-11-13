@@ -33,7 +33,7 @@ impl ChunkType {
         self.is_reserved_bit_valid()
     }
 
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         return String::from_utf8(self.bytes().try_into().unwrap()).unwrap();
     }
 
