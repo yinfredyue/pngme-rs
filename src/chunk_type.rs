@@ -8,7 +8,7 @@ pub enum ChunkTypeError {
 }
 
 #[derive(Debug, Eq)]
-struct ChunkType {
+pub struct ChunkType {
     bytes: [u8; 4],
 }
 
@@ -37,7 +37,7 @@ impl ChunkType {
         return String::from_utf8(self.bytes().try_into().unwrap()).unwrap();
     }
 
-    fn bytes(&self) -> [u8; 4] {
+    pub fn bytes(&self) -> [u8; 4] {
         self.bytes
     }
 }
